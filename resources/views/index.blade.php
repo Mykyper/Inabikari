@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Inabikari Community | Home</title>
-    <link rel="icon" href="{{ asset('raidencute.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('images/raidencute.ico') }}" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700;800&amp;display=swap"
         rel="stylesheet" />
@@ -432,9 +432,9 @@ keyframes: {
         <div class="absolute inset-0 z-0">
             <div class="absolute inset-0 hero-gradient z-10"></div>
             <img alt="Community Background" class="w-full h-full object-cover hidden md:block animate-pulse-slow"
-                src="{{ asset('inabikari.gif') }}" />
+                src="{{ asset('images/inabikari.gif') }}" />
             <img alt="Community Background Mobile" class="w-full h-full object-cover md:hidden animate-pulse-slow"
-                src="{{ asset('inabikari.gif') }}" style="object-position: center; transform: scale(1.2);" />
+                src="{{ asset('images/inabikari.gif') }}" style="object-position: center; transform: scale(1.2);" />
         </div>
 
         <!-- Contenu -->
@@ -550,18 +550,18 @@ keyframes: {
                 <div class="space-y-4">
                     <img alt="Gaming Setup"
     class="w-full h-64 object-cover rounded-2xl border border-border-dark hover-lift hover-glow transition-all duration-500"
-    src="{{ asset('2XKO.jpg') }}" />
+    src="{{ asset('images/2XKO.jpg') }}" />
                     <img alt="Tech Mix"
                         class="w-full h-48 object-cover rounded-2xl border border-border-dark hover-lift hover-glow transition-all duration-500"
-                        src="{{ asset('star-rail.png') }}" />
+                        src="{{ asset('images/star-rail.png') }}" />
                 </div>
                 <div class="space-y-4 pt-8">
                     <img alt="Arena"
                         class="w-full h-48 object-cover rounded-2xl border border-border-dark hover-lift hover-glow transition-all duration-500"
-                        src="{{ asset('rivals.jpg') }}" />
+                        src="{{ asset('images/rivals.jpg') }}" />
                     <img alt="Competition"
     class="w-full h-64 object-cover object-left rounded-2xl border border-border-dark hover-lift hover-glow transition-all duration-500"
-    src="{{ asset('peak.png') }}" />
+    src="{{ asset('images/peak.png') }}" />
                 </div>
             </div>
         </div>

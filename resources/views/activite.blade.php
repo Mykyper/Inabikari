@@ -6,7 +6,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link rel="icon" href="{{ asset('raidencute.ico') }}" type="image/x-icon">
+<link rel="icon" href="{{ asset('images/raidencute.ico') }}" type="image/x-icon">
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
