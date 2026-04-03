@@ -10,16 +10,19 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Config;  // ← AJOUT OBLIGATOIRE
 
 class DiscordController extends Controller
 {
     /**
      * Version avec la bibliothèque Discord PHP (asynchrone)
+     * ⚠️ DÉCONSEILLÉE en production - gardée pour compatibilité
      */
     public function serverInfo()
     {
+        // ✅ CORRIGÉ
         $discord = new Discord([
-            'token' => env('DISCORD_BOT_TOKEN'),
+            'token' => Config::get('discord.bot_token')
         ]);
 
         // Variable pour stocker les données
@@ -35,8 +38,8 @@ class DiscordController extends Controller
         $discord->on('ready', function (Discord $discord) use (&$data) {
             echo "Bot is ready!", PHP_EOL;
 
-            // Récupère le serveur (guild)
-            $guildId = env('DISCORD_GUILD_ID');
+            // ✅ CORRIGÉ
+            $guildId = Config::get('discord.guild_id');
             $guild = $discord->guilds->get('id', $guildId);
 
             if ($guild) {
@@ -59,14 +62,16 @@ class DiscordController extends Controller
                 }
 
                 // Trie les rôles par position
-                usort($data['roles'], function ($a, $b) {
-                            return $b['position'] <=> $a['position'];
-                        }
-                        );
+                usort(
+                    $data['roles'],
+                    function ($a, $b) {
+                        return $b['position'] <=> $a['position'];
                     }
+                );
+            }
 
-                    $discord->close();
-                });
+            $discord->close();
+        });
 
         $discord->run();
         sleep(2);
@@ -80,8 +85,21 @@ class DiscordController extends Controller
      */
     public function simpleServerInfo()
     {
-        $token = env('DISCORD_BOT_TOKEN');
-        $guildId = env('DISCORD_GUILD_ID');
+        // ✅ CORRIGÉ - avec valeurs par défaut
+        $token = Config::get('discord.bot_token');
+        $guildId = Config::get('discord.guild_id');
+
+        // Sécurité : si les variables ne sont pas chargées
+        if (!$token || !$guildId) {
+            Log::error('Discord: Token ou Guild ID manquant');
+            return view('index', [
+                'membersCount' => 15402,
+                'onlineCount' => 4203,
+                'serverName' => 'Inabikari',
+                'serverIcon' => null,
+                'roles' => []
+            ]);
+        }
 
         $client = new \GuzzleHttp\Client([
             'headers' => [
@@ -113,8 +131,7 @@ class DiscordController extends Controller
                 'roles' => array_slice(array_values($filteredRoles), 0, 10)
             ];
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             // Valeurs par défaut en cas d'erreur
             $data = [
                 'membersCount' => 15402,
@@ -135,11 +152,21 @@ class DiscordController extends Controller
      */
     public function getMembres(Request $request)
     {
-        $token = env('DISCORD_BOT_TOKEN');
-        $guildId = env('DISCORD_GUILD_ID');
+        // ✅ CORRIGÉ
+        $token = Config::get('discord.bot_token');
+        $guildId = Config::get('discord.guild_id');
         $search = $request->get('search', '');
         $page = $request->get('page', 1);
         $perPage = 12;
+
+        // Sécurité
+        if (!$token || !$guildId) {
+            Log::error('Discord: Token ou Guild ID manquant pour getMembres');
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'error' => 'Configuration Discord manquante'], 500);
+            }
+            return view('membre', ['membres' => [], 'total' => 0, 'error' => 'Configuration Discord manquante']);
+        }
 
         $client = new \GuzzleHttp\Client([
             'headers' => [
@@ -168,7 +195,7 @@ class DiscordController extends Controller
                 $membresData = [];
 
                 foreach ($membres as $membre) {
-                    // Ignorer les bots (optionnel)
+                    // Ignorer les bots (optionnel - décommenter si voulu)
                     // if ($membre['user']['bot'] ?? false) continue;
 
                     // Trouver le rôle le plus haut
@@ -193,7 +220,6 @@ class DiscordController extends Controller
                     // Formater la couleur du rôle correctement
                     $roleColor = null;
                     if ($highestRole && isset($highestRole['color'])) {
-                        // S'assurer que la couleur est sur 6 chiffres hexadécimaux
                         $roleColor = '#' . str_pad(dechex($highestRole['color']), 6, '0', STR_PAD_LEFT);
                     }
 
@@ -208,7 +234,7 @@ class DiscordController extends Controller
                             'name' => $highestRole['name'],
                             'name_lower' => strtolower($highestRole['name']),
                             'color' => $highestRole['color'],
-                            'color_hex' => $roleColor, // ✅ Ajout de la couleur formatée
+                            'color_hex' => $roleColor,
                             'position' => $highestRole['position'],
                         ] : null,
                         'roles_count' => count($membre['roles']),
@@ -217,15 +243,17 @@ class DiscordController extends Controller
                 }
 
                 // Trier par position du rôle
-                usort($membresData, function ($a, $b) {
+                usort(
+                    $membresData,
+                    function ($a, $b) {
                         $posA = $a['highest_role']['position'] ?? -1;
                         $posB = $b['highest_role']['position'] ?? -1;
                         return $posB <=> $posA;
                     }
-                    );
+                );
 
-                    return $membresData;
-                });
+                return $membresData;
+            });
 
             // Filtrer par recherche si nécessaire
             if (!empty($search)) {
@@ -267,8 +295,7 @@ class DiscordController extends Controller
                 'search' => $search
             ]);
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Erreur récupération membres: ' . $e->getMessage());
 
             if ($request->ajax()) {
@@ -291,8 +318,15 @@ class DiscordController extends Controller
      */
     public function getMembreData($id)
     {
-        $token = env('DISCORD_BOT_TOKEN');
-        $guildId = env('DISCORD_GUILD_ID');
+        // ✅ CORRIGÉ
+        $token = Config::get('discord.bot_token');
+        $guildId = Config::get('discord.guild_id');
+
+        // Sécurité
+        if (!$token || !$guildId) {
+            Log::error('Discord: Token ou Guild ID manquant pour getMembreData');
+            return response()->json(['success' => false, 'error' => 'Configuration Discord manquante'], 500);
+        }
 
         $client = new \GuzzleHttp\Client([
             'headers' => [
@@ -365,8 +399,7 @@ class DiscordController extends Controller
                 'data' => $data
             ]);
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Erreur récupération membre: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
@@ -390,8 +423,15 @@ class DiscordController extends Controller
      */
     public function getStats()
     {
-        $token = env('DISCORD_BOT_TOKEN');
-        $guildId = env('DISCORD_GUILD_ID');
+        // ✅ CORRIGÉ
+        $token = Config::get('discord.bot_token');
+        $guildId = Config::get('discord.guild_id');
+
+        // Sécurité
+        if (!$token || !$guildId) {
+            Log::error('Discord: Token ou Guild ID manquant pour getStats');
+            return response()->json(['success' => false, 'error' => 'Configuration Discord manquante'], 500);
+        }
 
         $client = new \GuzzleHttp\Client([
             'headers' => [
@@ -411,8 +451,7 @@ class DiscordController extends Controller
                 'name' => $guild['name'],
             ]);
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage()
