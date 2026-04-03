@@ -11,7 +11,7 @@
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700;800;900&amp;display=swap"
         rel="stylesheet" />
-        <link rel="icon" href="{{ asset('images/raidencute.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('images/raidencute.ico') }}" type="image/x-icon">
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -74,12 +74,13 @@
             opacity: 0;
             animation: cardAppear 0.5s ease-out forwards;
         }
-        
+
         @keyframes cardAppear {
             from {
                 opacity: 0;
                 transform: translateY(15px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -106,57 +107,65 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* Styles du modal */
         #membre-modal {
             display: none;
         }
-        
+
         #membre-modal.show {
             display: block;
         }
-        
+
         .modal-content {
             animation: modalSlideIn 0.3s ease-out;
         }
-        
+
         @keyframes modalSlideIn {
             from {
                 opacity: 0;
                 transform: translateY(20px) scale(0.95);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
             }
         }
-        
+
         .modal-overlay {
             animation: fadeIn 0.2s ease-out;
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
-        
+
         /* Scrollbar stylisée pour la liste des rôles */
         .roles-scroll::-webkit-scrollbar {
             width: 4px;
         }
-        
+
         .roles-scroll::-webkit-scrollbar-track {
             background: rgba(108, 43, 238, 0.1);
             border-radius: 10px;
         }
-        
+
         .roles-scroll::-webkit-scrollbar-thumb {
             background: rgba(108, 43, 238, 0.5);
             border-radius: 10px;
         }
-        
+
         .roles-scroll::-webkit-scrollbar-thumb:hover {
             background: rgba(108, 43, 238, 0.8);
         }
@@ -165,7 +174,7 @@
         .stat-card {
             transition: all 0.3s ease;
         }
-        
+
         .stat-card:hover {
             transform: scale(1.05);
             background-color: rgba(108, 43, 238, 0.15);
@@ -175,7 +184,7 @@
         .role-badge {
             transition: all 0.2s ease;
         }
-        
+
         .role-badge:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -187,57 +196,69 @@
     <div class="relative flex flex-col min-h-screen w-full overflow-x-hidden">
         <!-- Navigation Bar -->
         <nav class="sticky top-0 z-50 border-b border-border-dark bg-background-dark/80 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16 items-center">
-            <!-- Logo -->
-            <div class="flex items-center gap-3 group">
-                <div class="bg-primary p-1.5 rounded-lg transition-all duration-500 group-hover:rotate-12 group-hover:scale-110">
-                    <span class="material-symbols-outlined text-white text-2xl">rocket_launch</span>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16 items-center">
+                    <!-- Logo -->
+                    <div class="flex items-center gap-3 group">
+                        <div
+                            class="bg-primary p-1.5 rounded-lg transition-all duration-500 group-hover:rotate-12 group-hover:scale-110">
+                            <span class="material-symbols-outlined text-white text-2xl">rocket_launch</span>
+                        </div>
+                        <span
+                            class="text-xl font-bold tracking-tight text-white group-hover:text-primary transition-colors">Inabikari
+                            Hub</span>
+                    </div>
+
+                    <!-- Desktop Nav Links (caché sur mobile) -->
+                    <div class="hidden md:flex items-center gap-8">
+                        <a class="text-sm font-medium text-white hover:text-primary transition-all hover:scale-110"
+                            href="{{ route('home') }}">Accueil</a>
+                        <a class="text-sm font-medium text-slate-400 hover:text-white transition-all hover:scale-110"
+                            href="#">À propos de nous</a>
+                        <a class="text-sm font-medium text-slate-400 hover:text-white transition-all hover:scale-110"
+                            href="{{ route('activite') }}">Activités</a>
+                    </div>
+
+                    <!-- Boutons à droite -->
+                    <div class="flex items-center gap-4">
+                        <!-- Bouton Discord (caché sur mobile) -->
+                        <a href="https://discord.gg/SjTRDRaAc6" target="_blank" class="hidden md:block">
+                            <button
+                                class="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all duration-300 neon-glow hover:scale-110 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-lg">chat</span>
+                                Rejoins-nous
+                            </button>
+                        </a>
+
+                        <!-- Bouton Hamburger (visible uniquement sur mobile) -->
+                        <button id="menu-btn"
+                            class="md:hidden text-white p-2 hover:bg-primary/20 rounded-lg transition-colors">
+                            <span class="material-symbols-outlined text-3xl">menu</span>
+                        </button>
+                    </div>
                 </div>
-                <span class="text-xl font-bold tracking-tight text-white group-hover:text-primary transition-colors">Inabikari Hub</span>
-            </div>
 
-            <!-- Desktop Nav Links (caché sur mobile) -->
-            <div class="hidden md:flex items-center gap-8">
-                <a class="text-sm font-medium text-white hover:text-primary transition-all hover:scale-110" href="{{ route('home') }}">Accueil</a>
-                <a class="text-sm font-medium text-slate-400 hover:text-white transition-all hover:scale-110" href="#">À propos de nous</a>
-                <a class="text-sm font-medium text-slate-400 hover:text-white transition-all hover:scale-110" href="{{ route('activite') }}">Activités</a>
+                <!-- Menu Mobile (caché par défaut) -->
+                <div id="mobile-menu" class="hidden md:hidden py-4 border-t border-border-dark mt-2">
+                    <div class="flex flex-col space-y-3">
+                        <a class="text-base font-medium text-white hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-primary/10"
+                            href="{{ route('home') }}">Accueil</a>
+                        <a class="text-base font-medium text-slate-400 hover:text-white transition-colors py-2 px-3 rounded-lg hover:bg-primary/10"
+                            href="#">À propos de nous</a>
+                        <a class="text-base font-medium text-slate-400 hover:text-white transition-colors py-2 px-3 rounded-lg hover:bg-primary/10"
+                            href="{{ route('activite') }}">Activités</a>
+                        <!-- Lien Discord pour mobile -->
+                        <a href="https://discord.gg/SjTRDRaAc6" target="_blank" class="mt-2">
+                            <button
+                                class="w-full bg-primary hover:bg-primary/90 text-white px-5 py-3 rounded-lg text-base font-bold transition-all duration-300 neon-glow flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined">chat</span>
+                                Rejoins-nous
+                            </button>
+                        </a>
+                    </div>
+                </div>
             </div>
-
-            <!-- Boutons à droite -->
-            <div class="flex items-center gap-4">
-                <!-- Bouton Discord (caché sur mobile) -->
-                <a href="https://discord.gg/SjTRDRaAc6" target="_blank" class="hidden md:block">
-                    <button class="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-lg text-sm font-bold transition-all duration-300 neon-glow hover:scale-110 flex items-center gap-2">
-                        <span class="material-symbols-outlined text-lg">chat</span>
-                        Rejoins-nous
-                    </button>
-                </a>
-                
-                <!-- Bouton Hamburger (visible uniquement sur mobile) -->
-                <button id="menu-btn" class="md:hidden text-white p-2 hover:bg-primary/20 rounded-lg transition-colors">
-                    <span class="material-symbols-outlined text-3xl">menu</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Menu Mobile (caché par défaut) -->
-        <div id="mobile-menu" class="hidden md:hidden py-4 border-t border-border-dark mt-2">
-            <div class="flex flex-col space-y-3">
-                <a class="text-base font-medium text-white hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-primary/10" href="{{ route('home') }}">Accueil</a>
-                <a class="text-base font-medium text-slate-400 hover:text-white transition-colors py-2 px-3 rounded-lg hover:bg-primary/10" href="#">À propos de nous</a>
-          <a class="text-base font-medium text-slate-400 hover:text-white transition-colors py-2 px-3 rounded-lg hover:bg-primary/10" href="{{ route('activite') }}">Activités</a>
-                <!-- Lien Discord pour mobile -->
-                <a href="https://discord.gg/SjTRDRaAc6" target="_blank" class="mt-2">
-                    <button class="w-full bg-primary hover:bg-primary/90 text-white px-5 py-3 rounded-lg text-base font-bold transition-all duration-300 neon-glow flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined">chat</span>
-                        Rejoins-nous
-                    </button>
-                </a>
-            </div>
-        </div>
-    </div>
-</nav>
+        </nav>
 
         <!-- Main Content -->
         <main class="flex-1 w-full max-w-7xl mx-auto px-6 lg:px-20 py-12">
@@ -245,19 +266,20 @@
             <div class="mb-10 space-y-2 animate-fade-in-up">
                 <h2 class="text-4xl lg:text-5xl font-black tracking-tighter dark:text-white">Les Membres du serveur</h2>
                 <p class="text-slate-500 dark:text-slate-400 max-w-2xl text-lg">
-                    Parcours notre communauté de <span id="total-membres" class="text-primary font-bold">{{ number_format($total ?? 1248, 0, ',', ' ') }}</span> membres
+                    Parcours notre communauté de <span id="total-membres"
+                        class="text-primary font-bold">{{ number_format($total ?? 1248, 0, ',', ' ') }}</span> membres
                 </p>
             </div>
 
             <!-- Search Bar -->
-            <div class="sticky top-[88px] z-40 bg-background-light dark:bg-background-dark py-4 flex flex-col gap-6 mb-8 animate-fade-in-up" style="animation-delay: 0.1s">
+            <div class="sticky top-[88px] z-40 bg-background-light dark:bg-background-dark py-4 flex flex-col gap-6 mb-8 animate-fade-in-up"
+                style="animation-delay: 0.1s">
                 <div class="relative group max-w-2xl">
-                    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">search</span>
-                    <input id="search-input" 
-                           type="text"
-                           value="{{ $search ?? '' }}"
-                           class="w-full bg-slate-200 dark:bg-primary/5 border-none focus:ring-2 focus:ring-primary rounded-xl py-4 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-500 transition-all focus:scale-[1.02]"
-                           placeholder="Rechercher un membre par nom ou rôle..." />
+                    <span
+                        class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">search</span>
+                    <input id="search-input" type="text" value="{{ $search ?? '' }}"
+                        class="w-full bg-slate-200 dark:bg-primary/5 border-none focus:ring-2 focus:ring-primary rounded-xl py-4 pl-12 pr-4 text-slate-900 dark:text-white placeholder:text-slate-500 transition-all focus:scale-[1.02]"
+                        placeholder="Rechercher un membre par nom ou rôle..." />
                 </div>
             </div>
 
@@ -272,55 +294,60 @@
             </div>
 
             <!-- Load More Button -->
-            <div id="load-more-container" class="mt-16 flex flex-col items-center gap-4 animate-fade-in-up" style="animation-delay: 0.2s">
+            <div id="load-more-container" class="mt-16 flex flex-col items-center gap-4 animate-fade-in-up"
+                style="animation-delay: 0.2s">
                 @if(($total ?? 0) > count($membres ?? []))
-                <button id="load-more-btn" 
+                    <button id="load-more-btn"
                         class="px-8 py-3 rounded-xl border border-primary/30 text-primary font-bold hover:bg-primary hover:text-white transition-all duration-300 flex items-center gap-2 hover:scale-110 hover:shadow-lg hover:shadow-primary/20"
                         data-page="1">
-                    <span class="material-symbols-outlined group-hover:rotate-12 transition-transform">expand_more</span>
-                    Charger plus de membres
-                </button>
+                        <span
+                            class="material-symbols-outlined group-hover:rotate-12 transition-transform">expand_more</span>
+                        Charger plus de membres
+                    </button>
                 @endif
             </div>
         </main>
 
         <!-- Footer -->
-       <footer class="bg-background-dark border-t border-border-dark pt-16 pb-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
-                <p class="hover:text-white transition-colors">© 2026 Inabikari. Tous droits réservés.</p>
-                <p class="hover:text-white transition-colors">{{ $serverName ?? 'Inabikari' }}</p>
-                <div class="flex items-center gap-2 hover:text-white transition-colors group">
-                    <span>Powered by</span>
-                    <span class="text-slate-300 font-bold group-hover:text-primary transition-colors">Laravel</span>
+        <footer class="bg-background-dark border-t border-border-dark pt-16 pb-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+                    <p class="hover:text-white transition-colors">© 2026 Inabikari. Tous droits réservés.</p>
+                    <p class="hover:text-white transition-colors">{{ $serverName ?? 'Inabikari' }}</p>
+                    <div class="flex items-center gap-2 hover:text-white transition-colors group">
+                        <span>Powered by</span>
+                        <span class="text-slate-300 font-bold group-hover:text-primary transition-colors">Laravel</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </footer>
+        </footer>
     </div>
 
     <!-- MODAL PROFIL -->
-    <div id="membre-modal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div id="membre-modal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
         <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <!-- Overlay -->
-            <div class="modal-overlay fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" aria-hidden="true" id="modal-overlay"></div>
+            <div class="modal-overlay fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" aria-hidden="true"
+                id="modal-overlay"></div>
 
             <!-- Conteneur du modal -->
-            <div class="modal-content inline-block align-bottom bg-surface-dark rounded-3xl border border-border-dark text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
-                
+            <div
+                class="modal-content inline-block align-bottom bg-surface-dark rounded-3xl border border-border-dark text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
+
                 <!-- Contenu du modal (rempli dynamiquement) -->
                 <div id="modal-content" class="relative min-h-[400px]">
                     <div class="flex justify-center items-center p-12">
                         <div class="loading-spinner"></div>
                     </div>
                 </div>
-                
+
             </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Éléments existants
             const searchInput = document.getElementById('search-input');
             const membresGrid = document.getElementById('membres-grid');
@@ -329,12 +356,12 @@
             const displayedCount = document.getElementById('displayed-count');
             const totalCount = document.getElementById('total-count');
             const totalMembresSpan = document.getElementById('total-membres');
-            
+
             // Éléments du modal
             const modal = document.getElementById('membre-modal');
             const modalContent = document.getElementById('modal-content');
             const overlay = document.getElementById('modal-overlay');
-            
+
             let currentPage = 1;
             let currentSearch = searchInput.value;
             let isLoading = false;
@@ -355,7 +382,7 @@
                 const now = new Date();
                 const diffTime = Math.abs(now - joinDate);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                
+
                 if (diffDays < 30) return `${diffDays} jours`;
                 if (diffDays < 365) return `${Math.floor(diffDays / 30)} mois`;
                 return `${Math.floor(diffDays / 365)} an${Math.floor(diffDays / 365) > 1 ? 's' : ''}`;
@@ -369,7 +396,7 @@
                     month: '2-digit',
                     year: 'numeric'
                 });
-                
+
                 // Calcul de l'ancienneté
                 const now = new Date();
                 const diffTime = Math.abs(now - joinDate);
@@ -385,13 +412,13 @@
                     data.roles.forEach(role => {
                         // Formater la couleur correctement (toujours 6 chiffres hexadécimaux)
                         let color = '#6c2bee'; // Couleur par défaut
-                        
+
                         if (role.color) {
                             // Convertir en hexadécimal et s'assurer qu'il y a 6 chiffres
                             const hexColor = role.color.toString(16).padStart(6, '0');
                             color = '#' + hexColor;
                         }
-                        
+
                         rolesHtml += `
                             <span class="role-badge px-4 py-2 rounded-xl text-sm font-medium inline-block"
                                   style="background-color: ${color}20; color: ${color}; border: 1px solid ${color}30;">
@@ -402,7 +429,7 @@
                 }
 
                 // Bannière ou fond par défaut
-                const bannerHtml = data.banner 
+                const bannerHtml = data.banner
                     ? `<div class="h-40 w-full bg-cover bg-center animate-scale-in" style="background-image: url('${data.banner}')"></div>`
                     : `<div class="h-32 w-full bg-gradient-to-r from-primary to-purple-600 animate-pulse-slow"></div>`;
 
@@ -475,7 +502,7 @@
             function openModal(memberId) {
                 modal.classList.add('show');
                 document.body.style.overflow = 'hidden';
-                
+
                 // Charger les données du membre
                 fetch(`/membre-data/${memberId}`)
                     .then(response => response.json())
@@ -515,7 +542,7 @@
             }
 
             // Écouter les clics sur les boutons d'ouverture
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 const openBtn = e.target.closest('.open-modal-btn');
                 if (openBtn) {
                     e.preventDefault();
@@ -525,7 +552,7 @@
             });
 
             // Fermer avec le bouton (délégation d'événement)
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 if (e.target.classList.contains('close-modal') || e.target.closest('.close-modal')) {
                     closeModal();
                 }
@@ -537,7 +564,7 @@
             }
 
             // Fermer avec la touche Echap
-            document.addEventListener('keydown', function(e) {
+            document.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape' && modal.classList.contains('show')) {
                     closeModal();
                 }
@@ -545,7 +572,7 @@
 
             // Debounce pour la recherche
             let searchTimeout;
-            searchInput.addEventListener('input', function() {
+            searchInput.addEventListener('input', function () {
                 clearTimeout(searchTimeout);
                 searchTimeout = setTimeout(() => {
                     currentSearch = this.value;
@@ -556,7 +583,7 @@
 
             // Charger plus de membres
             if (loadMoreBtn) {
-                loadMoreBtn.addEventListener('click', function() {
+                loadMoreBtn.addEventListener('click', function () {
                     currentPage++;
                     fetchMembres(false);
                 });
@@ -564,14 +591,16 @@
 
             function fetchMembres(resetGrid = true) {
                 if (isLoading) return;
-                
+
                 isLoading = true;
                 loading.classList.remove('hidden');
-                
+
                 if (resetGrid) {
                     membresGrid.innerHTML = '';
+                    currentPage = 1;  // ✅ Important : reset la page
                 }
 
+                // ✅ Construire l'URL avec les bons paramètres
                 const url = new URL(window.location.href);
                 url.searchParams.set('search', currentSearch);
                 url.searchParams.set('page', currentPage);
@@ -582,85 +611,83 @@
                         'X-Requested-With': 'XMLHttpRequest'
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        if (resetGrid) {
-                            membresGrid.innerHTML = data.html;
-                        } else {
-                            membresGrid.insertAdjacentHTML('beforeend', data.html);
-                        }
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            if (resetGrid) {
+                                membresGrid.innerHTML = data.html;
+                            } else {
+                                membresGrid.insertAdjacentHTML('beforeend', data.html);
+                            }
 
-                        // ✅ Mise à jour du compteur affiché
-                        displayedCount.textContent = data.displayed;
-                        
-                        // ✅ Mise à jour du total
-                        totalCount.textContent = data.total.toLocaleString();
-                        if (totalMembresSpan) {
-                            totalMembresSpan.textContent = data.total.toLocaleString();
-                        }
+                            // ✅ Mise à jour du compteur
+                            if (displayedCount) displayedCount.textContent = data.displayed;
+                            if (totalCount) totalCount.textContent = data.total.toLocaleString();
+                            if (totalMembresSpan) totalMembresSpan.textContent = data.total.toLocaleString();
 
-                        // Gestion du bouton "Charger plus"
-                        const loadMoreContainer = document.getElementById('load-more-container');
-                        const existingBtn = document.getElementById('load-more-btn');
-                        
-                        if (data.hasMore) {
-                            if (!existingBtn) {
-                                const btn = document.createElement('button');
-                                btn.id = 'load-more-btn';
-                                btn.className = 'px-8 py-3 rounded-xl border border-primary/30 text-primary font-bold hover:bg-primary hover:text-white transition-all duration-300 flex items-center gap-2 hover:scale-110 hover:shadow-lg hover:shadow-primary/20';
-                                btn.innerHTML = '<span class="material-symbols-outlined">expand_more</span> Charger plus de membres';
-                                btn.addEventListener('click', function() {
-                                    currentPage++;
-                                    fetchMembres(false);
-                                });
-                                loadMoreContainer.insertBefore(btn, loadMoreContainer.firstChild);
+                            // ✅ Gestion du bouton "Charger plus"
+                            const loadMoreContainer = document.getElementById('load-more-container');
+                            let existingBtn = document.getElementById('load-more-btn');
+
+                            if (data.hasMore) {
+                                if (!existingBtn) {
+                                    const btn = document.createElement('button');
+                                    btn.id = 'load-more-btn';
+                                    btn.className = 'px-8 py-3 rounded-xl border border-primary/30 text-primary font-bold hover:bg-primary hover:text-white transition-all duration-300 flex items-center gap-2 hover:scale-110 hover:shadow-lg hover:shadow-primary/20';
+                                    btn.innerHTML = '<span class="material-symbols-outlined">expand_more</span> Charger plus de membres';
+                                    btn.addEventListener('click', () => {
+                                        currentPage++;
+                                        fetchMembres(false);
+                                    });
+                                    loadMoreContainer.appendChild(btn);
+                                }
+                            } else {
+                                if (existingBtn) existingBtn.remove();
                             }
                         } else {
-                            if (existingBtn) {
-                                existingBtn.remove();
-                            }
+                            console.error('Erreur:', data.error);
+                            membresGrid.innerHTML = `<div class="col-span-full text-center py-12 text-red-400">Erreur: ${data.error}</div>`;
                         }
+                    })
+                    .catch(error => {
+                        console.error('Fetch error:', error);
+                    })
+                    .finally(() => {
+                        isLoading = false;
+                        loading.classList.add('hidden');
+                    });
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            // Menu Hamburger
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            if (menuBtn && mobileMenu) {
+                menuBtn.addEventListener('click', function () {
+                    mobileMenu.classList.toggle('hidden');
+
+                    // Change l'icône entre menu et close
+                    const icon = menuBtn.querySelector('.material-symbols-outlined');
+                    if (icon.textContent === 'menu') {
+                        icon.textContent = 'close';
+                    } else {
+                        icon.textContent = 'menu';
                     }
-                })
-                .catch(error => {
-                    console.error('Erreur:', error);
-                })
-                .finally(() => {
-                    isLoading = false;
-                    loading.classList.add('hidden');
+                });
+
+                // Ferme le menu quand on clique sur un lien
+                const mobileLinks = mobileMenu.querySelectorAll('a');
+                mobileLinks.forEach(link => {
+                    link.addEventListener('click', function () {
+                        mobileMenu.classList.add('hidden');
+                        const icon = menuBtn.querySelector('.material-symbols-outlined');
+                        icon.textContent = 'menu';
+                    });
                 });
             }
         });
-         document.addEventListener('DOMContentLoaded', function() {
-        // Menu Hamburger
-        const menuBtn = document.getElementById('menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        if (menuBtn && mobileMenu) {
-            menuBtn.addEventListener('click', function() {
-                mobileMenu.classList.toggle('hidden');
-                
-                // Change l'icône entre menu et close
-                const icon = menuBtn.querySelector('.material-symbols-outlined');
-                if (icon.textContent === 'menu') {
-                    icon.textContent = 'close';
-                } else {
-                    icon.textContent = 'menu';
-                }
-            });
-
-            // Ferme le menu quand on clique sur un lien
-            const mobileLinks = mobileMenu.querySelectorAll('a');
-            mobileLinks.forEach(link => {
-                link.addEventListener('click', function() {
-                    mobileMenu.classList.add('hidden');
-                    const icon = menuBtn.querySelector('.material-symbols-outlined');
-                    icon.textContent = 'menu';
-                });
-            });
-        }
-    });
     </script>
 </body>
+
 </html>

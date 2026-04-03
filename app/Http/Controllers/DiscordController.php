@@ -155,17 +155,9 @@ class DiscordController extends Controller
         $token = Config::get('discord.bot_token');
         $guildId = Config::get('discord.guild_id');
         $search = $request->get('search', '');
-        $page = $request->get('page', 1);
+        $page = (int) $request->get('page', 1);
         $perPage = 12;
-        // DEBUG : Test simple de l'API Discord
-        try {
-            $testClient = new \GuzzleHttp\Client(['headers' => ['Authorization' => 'Bot ' . $token]]);
-            $testResponse = $testClient->get("https://discord.com/api/v10/guilds/{$guildId}");
-            $testData = json_decode($testResponse->getBody(), true);
-            Log::info('Discord API OK - Guild name: ' . ($testData['name'] ?? 'unknown'));
-        } catch (\Exception $e) {
-            Log::error('Discord API FAILED: ' . $e->getMessage());
-        }
+
         // Sécurité
         if (!$token || !$guildId) {
             Log::error('Discord: Token ou Guild ID manquant pour getMembres');
@@ -183,11 +175,6 @@ class DiscordController extends Controller
         ]);
 
         try {
-            // 🔴 SUPPRIME LE CACHE POUR TESTER
-            // $cacheKey = 'discord_membres_data';
-            // $membresData = Cache::remember($cacheKey, 300, function () use ($client, $guildId) {
-
-            // ✅ REMPLACE PAR UN APPEL DIRECT
             // Récupère tous les rôles
             $rolesResponse = $client->get("https://discord.com/api/v10/guilds/{$guildId}/roles");
             $roles = json_decode($rolesResponse->getBody(), true);
@@ -204,6 +191,9 @@ class DiscordController extends Controller
             $membresData = [];
 
             foreach ($membres as $membre) {
+                // Ignorer les bots (optionnel - décommente si voulu)
+                // if (($membre['user']['bot'] ?? false)) continue;
+
                 // Trouver le rôle le plus haut
                 $highestRole = null;
                 $highestPosition = -1;
@@ -247,29 +237,32 @@ class DiscordController extends Controller
                 ];
             }
 
-            // Trier par position du rôle
+            // Trier par position du rôle (ordre décroissant)
             usort($membresData, function ($a, $b) {
                 $posA = $a['highest_role']['position'] ?? -1;
                 $posB = $b['highest_role']['position'] ?? -1;
                 return $posB <=> $posA;
             });
 
-            // Filtrer par recherche si nécessaire
+            // ✅ CORRECTION : Appliquer le filtre APRÈS le tri
+            $filteredData = $membresData;
             if (!empty($search)) {
                 $searchLower = strtolower($search);
-                $membresData = array_filter($membresData, function ($membre) use ($searchLower) {
+                $filteredData = array_filter($membresData, function ($membre) use ($searchLower) {
                     $nameMatch = str_contains($membre['display_name_lower'], $searchLower);
                     $roleMatch = $membre['highest_role'] && str_contains($membre['highest_role']['name_lower'], $searchLower);
                     $usernameMatch = str_contains(strtolower($membre['username']), $searchLower);
                     return $nameMatch || $roleMatch || $usernameMatch;
                 });
+                // ✅ Réindexer le tableau après filtrage
+                $filteredData = array_values($filteredData);
             }
 
             // Pagination
-            $total = count($membresData);
-            $paginatedMembres = array_slice($membresData, ($page - 1) * $perPage, $perPage);
+            $total = count($filteredData);
+            $paginatedMembres = array_slice($filteredData, ($page - 1) * $perPage, $perPage);
 
-            // Si c'est une requête AJAX, retourner du JSON avec le HTML du partial
+            // ✅ Pour AJAX : retourner aussi la page courante et la recherche
             if ($request->ajax()) {
                 $html = view('partials.membres-grid', ['membres' => $paginatedMembres])->render();
 
@@ -280,11 +273,12 @@ class DiscordController extends Controller
                     'displayed' => count($paginatedMembres),
                     'page' => $page,
                     'perPage' => $perPage,
-                    'hasMore' => ($page * $perPage) < $total
+                    'hasMore' => ($page * $perPage) < $total,
+                    'search' => $search  // ✅ Retourner la recherche pour debug
                 ]);
             }
 
-            // Sinon, retourner la vue normale
+            // Vue normale
             return view('membre', [
                 'membres' => $paginatedMembres,
                 'total' => $total,
@@ -296,11 +290,10 @@ class DiscordController extends Controller
         } catch (\Exception $e) {
             Log::error('Erreur récupération membres: ' . $e->getMessage());
 
-            // ✅ AJOUTE LES LOGS DANS LA RÉPONSE POUR DEBUG
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'error' => $e->getMessage()  // ← Affiche l'erreur exacte
+                    'error' => $e->getMessage()
                 ], 500);
             }
 
