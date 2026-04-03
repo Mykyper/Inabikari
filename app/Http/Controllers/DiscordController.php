@@ -152,13 +152,20 @@ class DiscordController extends Controller
      */
     public function getMembres(Request $request)
     {
-        // ✅ CORRIGÉ
         $token = Config::get('discord.bot_token');
         $guildId = Config::get('discord.guild_id');
         $search = $request->get('search', '');
         $page = $request->get('page', 1);
         $perPage = 12;
-
+        // DEBUG : Test simple de l'API Discord
+        try {
+            $testClient = new \GuzzleHttp\Client(['headers' => ['Authorization' => 'Bot ' . $token]]);
+            $testResponse = $testClient->get("https://discord.com/api/v10/guilds/{$guildId}");
+            $testData = json_decode($testResponse->getBody(), true);
+            Log::info('Discord API OK - Guild name: ' . ($testData['name'] ?? 'unknown'));
+        } catch (\Exception $e) {
+            Log::error('Discord API FAILED: ' . $e->getMessage());
+        }
         // Sécurité
         if (!$token || !$guildId) {
             Log::error('Discord: Token ou Guild ID manquant pour getMembres');
@@ -176,83 +183,75 @@ class DiscordController extends Controller
         ]);
 
         try {
-            // Mettre en cache les données de base (5 minutes)
-            $cacheKey = 'discord_membres_data';
-            $membresData = Cache::remember($cacheKey, 300, function () use ($client, $guildId) {
-                // Récupère tous les rôles
-                $rolesResponse = $client->get("https://discord.com/api/v10/guilds/{$guildId}/roles");
-                $roles = json_decode($rolesResponse->getBody(), true);
+            // 🔴 SUPPRIME LE CACHE POUR TESTER
+            // $cacheKey = 'discord_membres_data';
+            // $membresData = Cache::remember($cacheKey, 300, function () use ($client, $guildId) {
 
-                $rolesById = [];
-                foreach ($roles as $role) {
-                    $rolesById[$role['id']] = $role;
-                }
+            // ✅ REMPLACE PAR UN APPEL DIRECT
+            // Récupère tous les rôles
+            $rolesResponse = $client->get("https://discord.com/api/v10/guilds/{$guildId}/roles");
+            $roles = json_decode($rolesResponse->getBody(), true);
 
-                // Récupère les membres (1000 max)
-                $membresResponse = $client->get("https://discord.com/api/v10/guilds/{$guildId}/members?limit=1000");
-                $membres = json_decode($membresResponse->getBody(), true);
+            $rolesById = [];
+            foreach ($roles as $role) {
+                $rolesById[$role['id']] = $role;
+            }
 
-                $membresData = [];
+            // Récupère les membres (1000 max)
+            $membresResponse = $client->get("https://discord.com/api/v10/guilds/{$guildId}/members?limit=1000");
+            $membres = json_decode($membresResponse->getBody(), true);
 
-                foreach ($membres as $membre) {
-                    // Ignorer les bots (optionnel - décommenter si voulu)
-                    // if ($membre['user']['bot'] ?? false) continue;
+            $membresData = [];
 
-                    // Trouver le rôle le plus haut
-                    $highestRole = null;
-                    $highestPosition = -1;
+            foreach ($membres as $membre) {
+                // Trouver le rôle le plus haut
+                $highestRole = null;
+                $highestPosition = -1;
 
-                    foreach ($membre['roles'] as $roleId) {
-                        if (isset($rolesById[$roleId])) {
-                            $role = $rolesById[$roleId];
-                            if ($role['position'] > $highestPosition) {
-                                $highestPosition = $role['position'];
-                                $highestRole = $role;
-                            }
+                foreach ($membre['roles'] as $roleId) {
+                    if (isset($rolesById[$roleId])) {
+                        $role = $rolesById[$roleId];
+                        if ($role['position'] > $highestPosition) {
+                            $highestPosition = $role['position'];
+                            $highestRole = $role;
                         }
                     }
-
-                    $displayName = $membre['nick'] ?? $membre['user']['global_name'] ?? $membre['user']['username'];
-                    $avatar = $membre['user']['avatar']
-                        ? "https://cdn.discordapp.com/avatars/{$membre['user']['id']}/{$membre['user']['avatar']}.png"
-                        : "https://cdn.discordapp.com/embed/avatars/" . (abs($membre['user']['id']) % 5) . ".png";
-
-                    // Formater la couleur du rôle correctement
-                    $roleColor = null;
-                    if ($highestRole && isset($highestRole['color'])) {
-                        $roleColor = '#' . str_pad(dechex($highestRole['color']), 6, '0', STR_PAD_LEFT);
-                    }
-
-                    $membresData[] = [
-                        'id' => $membre['user']['id'],
-                        'username' => $membre['user']['username'],
-                        'display_name' => $displayName,
-                        'display_name_lower' => strtolower($displayName),
-                        'avatar' => $avatar,
-                        'highest_role' => $highestRole ? [
-                            'id' => $highestRole['id'],
-                            'name' => $highestRole['name'],
-                            'name_lower' => strtolower($highestRole['name']),
-                            'color' => $highestRole['color'],
-                            'color_hex' => $roleColor,
-                            'position' => $highestRole['position'],
-                        ] : null,
-                        'roles_count' => count($membre['roles']),
-                        'joined_at' => $membre['joined_at'],
-                    ];
                 }
 
-                // Trier par position du rôle
-                usort(
-                    $membresData,
-                    function ($a, $b) {
-                        $posA = $a['highest_role']['position'] ?? -1;
-                        $posB = $b['highest_role']['position'] ?? -1;
-                        return $posB <=> $posA;
-                    }
-                );
+                $displayName = $membre['nick'] ?? $membre['user']['global_name'] ?? $membre['user']['username'];
+                $avatar = $membre['user']['avatar']
+                    ? "https://cdn.discordapp.com/avatars/{$membre['user']['id']}/{$membre['user']['avatar']}.png"
+                    : "https://cdn.discordapp.com/embed/avatars/" . (abs($membre['user']['id']) % 5) . ".png";
 
-                return $membresData;
+                $roleColor = null;
+                if ($highestRole && isset($highestRole['color'])) {
+                    $roleColor = '#' . str_pad(dechex($highestRole['color']), 6, '0', STR_PAD_LEFT);
+                }
+
+                $membresData[] = [
+                    'id' => $membre['user']['id'],
+                    'username' => $membre['user']['username'],
+                    'display_name' => $displayName,
+                    'display_name_lower' => strtolower($displayName),
+                    'avatar' => $avatar,
+                    'highest_role' => $highestRole ? [
+                        'id' => $highestRole['id'],
+                        'name' => $highestRole['name'],
+                        'name_lower' => strtolower($highestRole['name']),
+                        'color' => $highestRole['color'],
+                        'color_hex' => $roleColor,
+                        'position' => $highestRole['position'],
+                    ] : null,
+                    'roles_count' => count($membre['roles']),
+                    'joined_at' => $membre['joined_at'],
+                ];
+            }
+
+            // Trier par position du rôle
+            usort($membresData, function ($a, $b) {
+                $posA = $a['highest_role']['position'] ?? -1;
+                $posB = $b['highest_role']['position'] ?? -1;
+                return $posB <=> $posA;
             });
 
             // Filtrer par recherche si nécessaire
@@ -262,7 +261,6 @@ class DiscordController extends Controller
                     $nameMatch = str_contains($membre['display_name_lower'], $searchLower);
                     $roleMatch = $membre['highest_role'] && str_contains($membre['highest_role']['name_lower'], $searchLower);
                     $usernameMatch = str_contains(strtolower($membre['username']), $searchLower);
-
                     return $nameMatch || $roleMatch || $usernameMatch;
                 });
             }
@@ -298,17 +296,18 @@ class DiscordController extends Controller
         } catch (\Exception $e) {
             Log::error('Erreur récupération membres: ' . $e->getMessage());
 
+            // ✅ AJOUTE LES LOGS DANS LA RÉPONSE POUR DEBUG
             if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'Impossible de charger les membres'
+                    'error' => $e->getMessage()  // ← Affiche l'erreur exacte
                 ], 500);
             }
 
             return view('membre', [
                 'membres' => [],
                 'total' => 0,
-                'error' => 'Impossible de charger les membres pour le moment.'
+                'error' => 'Impossible de charger les membres: ' . $e->getMessage()
             ]);
         }
     }
